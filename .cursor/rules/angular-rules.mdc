@@ -1,0 +1,81 @@
+---
+description: when authoring angular code
+globs: 
+alwaysApply: false
+---
+When working on an Angular 19 web application, adhere to the following modern, idiomatic practices:
+
+1. **Standalone Components**: Always define components, directives, and pipes as standalone. Set `standalone: true` in their decorators and import all required dependencies directly in the `imports` array. Do not use NgModules unless absolutely necessary for legacy integration.
+
+2. **Reactivity with Signals and RxJS**:
+   - Use Signals (`signal()`, `computed()`, `effect()`) for reactive state management within components. Prefer Signals for simple, fine-grained updates to improve performance and readability.
+   - Use RxJS in services for advanced reactive programming scenarios, such as debouncing, throttling, combining streams, or handling HTTP requests. Leverage RxJS operators (e.g., `debounceTime`, `switchMap`) where Signals alone are insufficient.
+   - Combine Signals and RxJS when appropriate: for example, convert an RxJS Observable to a Signal using `toSignal()` for component consumption.
+
+3. **Modern Control Flow**: Use the new template syntax for control flow:
+   - Replace `*ngFor` with `@for` for iterating over lists.
+   - Replace `*ngIf` with `@if` for conditional rendering.
+   - Replace `ngSwitch` with `@switch`, `@case`, and `@default` for switch-case logic.
+   Ensure proper tracking in `@for` loops with `track $index` or a unique property.
+
+4. **Minimize Zone.js Usage**: Avoid relying on Zone.js for change detection unless integrating with older libraries that require it. Favor Signals and manual change detection where possible to reduce overhead, while using RxJS in services for event-driven logic.
+
+5. **TypeScript Best Practices**: Use strict typing with TypeScript. Leverage interfaces for data models and enforce type safety in templates with `$any()` only as a last resort.
+
+6. **Component Structure**: Keep components small, focused, and reusable. Use inputs (`@Input`) and outputs (`@Output`) with Signals where appropriate. Avoid deep component hierarchies; prefer composition over inheritance.
+
+7. **Service Design**: Encapsulate business logic and data fetching in services. Use RxJS Observables for asynchronous operations (e.g., HTTP calls) and transform them into Signals for component use when needed.
+
+8. **Styling**: Use modern CSS practices like Tailwind CSS or CSS custom properties (`--variables`) within `styles` or external `.css` files, scoped to standalone components.
+
+9. **File Naming**: Follow Angular conventions (e.g., `my-component.component.ts`, `my-service.service.ts`) and keep all related files (TS, HTML, CSS) co-located.
+
+Example:
+- A standalone component with Signals and a service using RxJS:
+```typescript
+// my-component.component.ts
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MyService } from './my.service';
+
+@Component({
+  selector: 'app-my-component',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    @if (count() > 0) {
+      <p>Count: {{ count() }}</p>
+    }
+    @for (item of items(); track item.id) {
+      <li>{{ item.name }}</li>
+    }
+  `,
+})
+export class MyComponent {
+  count = signal(0);
+  items = this.myService.getItemsSignal();
+
+  constructor(private myService: MyService) {}
+}
+
+// my.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { debounceTime, map, Observable } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+
+@Injectable({ providedIn: 'root' })
+export class MyService {
+  constructor(private http: HttpClient) {}
+
+  getItems(): Observable<{ id: number; name: string }[]> {
+    return this.http.get<any[]>('/api/items').pipe(
+      debounceTime(300), // RxJS for debouncing API calls
+      map(data => data.map(item => ({ id: item.id, name: item.name })))
+    );
+  }
+
+  getItemsSignal() {
+    return toSignal(this.getItems(), { initialValue: [] }); // Convert RxJS to Signal
+  }
+}

@@ -1,0 +1,144 @@
+<div class="dialog-container">
+  <div class="views-container" [class.show-assignment]="isAssigningSeats">
+    <!-- Seats List View -->
+    <div class="view seats-view">
+        <div class="dialog-header">
+          <h2>Reserved Seats for {{employee.fullName}}</h2>
+          <button mat-icon-button (click)="close()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+    <div class="dialog-content">
+      @if (loading) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      }
+
+      @if (error) {
+        <div class="error-message">
+          <mat-icon>error</mat-icon>
+          <p>{{error}}</p>
+        </div>
+      }
+
+      @if (!loading && !error && seats.length === 0) {
+        <div class="no-seats">
+          <mat-icon>info</mat-icon>
+          <p>No seats reserved</p>
+        </div>
+      }
+
+      @if (!loading && !error && seats.length > 0) {
+        <div class="seats-list">
+          @for (seat of seats; track seat.id) {
+            <div class="seat-item">
+              <div class="seat-location">
+                <div class="location-header">
+                  <mat-icon>apartment</mat-icon>
+                  <span class="floor-name">{{seat.room?.floor?.name || 'Unknown Floor'}}</span>
+                </div>
+                <div class="location-details">
+                  <div class="room-info">
+                    <mat-icon>meeting_room</mat-icon>
+                    <span>{{seat.room?.name || 'Unknown Room'}}</span>
+                  </div>
+                  <div class="seat-info">
+                    <mat-icon>event_seat</mat-icon>
+                    <span>{{seat.seatNumber}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="seat-actions">
+                <button mat-icon-button color="warn" (click)="unassignSeat(seat.id, $event)" matTooltip="Remove seat assignment">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!loading && !error) {
+        <div class="dialog-actions">
+          <button mat-raised-button color="primary" (click)="reserveSeat()">
+            <mat-icon>add</mat-icon>
+            Reserve Seat
+          </button>
+        </div>
+      }
+    </div>
+    </div>
+
+    <!-- Assignment View -->
+    <div class="view assignment-view">
+      <div class="dialog-header">
+        <div class="header-with-back">
+          <button mat-icon-button (click)="cancelAssignment()" class="back-button">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h2>Assign Seat for {{employee.fullName}}</h2>
+        </div>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    <div class="dialog-content seat-assignment">
+      <div class="employee-context">
+        <mat-icon>person</mat-icon>
+        <span>{{employee.fullName}}</span>
+      </div>
+
+      <mat-form-field class="floor-selector">
+        <mat-label>Select Floor</mat-label>
+        <mat-select [formControl]="selectedFloorControl">
+          @for (floor of floors(); track floor.floorNumber) {
+            <mat-option [value]="floor.floorNumber">
+              {{floor.name}}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-icon matSuffix>apartment</mat-icon>
+      </mat-form-field>
+
+      <div class="floor-content">
+        @if (assignmentLoading) {
+          <div class="loading-container">
+            <mat-spinner diameter="30"></mat-spinner>
+          </div>
+        }
+
+        @if (error) {
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            <p>{{error}}</p>
+          </div>
+        }
+
+        @if (!assignmentLoading && selectedFloor()) {
+          <div class="rooms-grid">
+            @for (room of selectedFloor()?.rooms; track room.roomNumber) {
+              <div class="room-card">
+                <div class="room-header">
+                  <span class="room-name">{{room.name}}</span>
+                  <span class="room-number">Room {{room.roomNumber}}</span>
+                </div>
+                <div class="seats-grid">
+                  @for (seat of room.seats; track trackBySeatId(0, seat)) {
+                    <div class="seat"
+                         [class.occupied]="isSeatOccupied(seat)"
+                         [class.recently-updated]="seatUpdate()?.seatId === seat.id"
+                         (click)="onSeatClick(seat.id)">
+                      <div class="seat-number">{{seat.seatNumber}}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+    </div>
+  </div>
+</div>

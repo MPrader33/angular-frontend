@@ -1,0 +1,379 @@
+// Global overrides for this dialog to constrain dropdowns
+::ng-deep .no-animation-dialog {
+  .mat-mdc-select-panel {
+    max-width: 600px !important;
+    max-height: 250px !important;
+  }
+  
+  .cdk-overlay-pane {
+    max-width: 600px !important;
+  }
+}
+
+.dialog-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  max-width: 100%; // Ensure it doesn't expand beyond container
+}
+
+.views-container {
+  display: flex;
+  width: 100%; // Width will expand automatically based on children
+  height: 100%;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(0); // Start showing first view
+  
+  &.show-assignment {
+    transform: translateX(-100%); // Slide by one full view width
+  }
+}
+
+.view {
+  flex: 0 0 100%; // Each view takes full dialog width
+  padding: 1rem; // Default padding for views
+  box-sizing: border-box;
+  overflow-y: auto; // Allow vertical scrolling within each view
+  max-height: 100%;
+  min-height: 100%;
+  flex-shrink: 0; // Prevent views from shrinking
+  
+  &.seats-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    // .dialog-content within seats-view can use the default padding
+    // and will be constrained by the overall dialog width.
+    .dialog-content {
+      width: 100%; // Take full width of the view's content area
+      // Removed max-width: 450px; to simplify, will rely on dialog width
+    }
+  }
+  
+  &.assignment-view {
+    display: flex;
+    flex-direction: column;
+    width: 100%; // Take full 50% portion of views-container
+    padding: 0.75rem; // Custom padding for this view
+    
+    .dialog-content { // This is the direct child for assignment content
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1; // Allow this to grow and fill space
+      // overflow-y: auto; // Let the parent .view handle scrolling
+
+      .floor-selector {
+        width: 100%;
+        margin-bottom: 1rem;
+        flex-shrink: 0; // Prevent selector from shrinking
+        
+        ::ng-deep .mat-mdc-select-panel {
+          max-width: calc(100vw - 40px) !important; 
+          max-height: 250px !important; // Increased max-height for dropdown
+        }
+      }
+      
+      .floor-content { // This will contain the scrollable rooms
+        width: 100%;
+        flex-grow: 1; // Allow this to take remaining space
+        overflow-y: auto; // IMPORTANT: Allow this section to scroll independently
+        min-height: 100px; // Ensure it has some minimum height to render
+        
+        .rooms-grid {
+          width: 100%;
+          display: flex; // Changed to flex for better control if needed
+          flex-direction: column;
+          gap: 1rem; // Consistent gap for room cards
+          
+          .room-card {
+            padding: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.15); // Darker border for better contrast
+            border-radius: 4px;
+            
+            .room-header {
+              margin-bottom: 0.75rem;
+            }
+            
+            .seats-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+              gap: 0.5rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: rgba(0, 0, 0, 0.87);
+  }
+  
+  .header-with-back {
+    display: flex;
+    align-items: center;
+    
+    .back-button {
+      margin-right: 8px;
+      color: #1976d2;
+    }
+    
+    h2 {
+      margin: 0;
+    }
+  }
+}
+
+.dialog-content {
+  position: relative;
+  min-height: 100px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #fdecea;
+  border-radius: 4px;
+  color: #d32f2f;
+
+  mat-icon {
+    color: #d32f2f;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.no-seats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: rgba(0, 0, 0, 0.6);
+  min-height: 100px;
+
+  mat-icon {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.seats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.seat-item {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &:hover {
+    background-color: #eeeeee;
+  }
+  
+
+
+  .seat-location {
+    padding: 1rem;
+    flex: 1;
+
+    .location-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+      mat-icon {
+        color: #1976d2;
+      }
+
+      .floor-name {
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.87);
+      }
+    }
+
+    .location-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-left: 1.5rem;
+
+      .room-info,
+      .seat-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        mat-icon {
+          font-size: 1.2rem;
+          width: 1.2rem;
+          height: 1.2rem;
+          color: rgba(0, 0, 0, 0.54);
+        }
+
+        span {
+          color: rgba(0, 0, 0, 0.87);
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+  
+  .seat-actions {
+    padding-right: 0.75rem;
+    
+    button {
+      opacity: 0.7;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+
+  button {
+    min-width: 150px;
+  }
+}
+
+// Seat assignment styles
+.seat-assignment {
+  .employee-context {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    color: #1976d2;
+  
+    mat-icon {
+      color: #1976d2;
+    }
+  
+    span {
+      font-weight: 500;
+    }
+  }
+  
+  .floor-selector {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .floor-content {
+    position: relative;
+    min-height: 100px;
+    margin-bottom: 1rem;
+  }
+  
+  .rooms-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .room-card {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    padding: 0.75rem;
+  }
+  
+  .room-header {
+    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
+  
+    .room-name {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+  
+    .room-number {
+      font-size: 0.75rem;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+  
+  .seats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .seat {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 36px;
+    padding: 0.25rem;
+    border-radius: 4px;
+    background-color: #e8f5e9; // pastel green for UNASSIGNED
+    border: 1px solid #81c784; // medium green border
+    color: #1b5e20; // dark green text
+    cursor: pointer;
+  
+    &:hover {
+      background-color: #dcedc8; // slightly darker green on hover
+    }
+  
+    &.occupied {
+      background-color: #ffebee; // pastel red for ASSIGNED
+      border: 2px solid #e57373; // medium red border
+      color: #c62828; // dark red text
+      font-weight: 600;
+  
+      &:hover {
+        background-color: #ffcdd2; // slightly darker red on hover
+      }
+    }
+  }
+  
+  .seat-number {
+    font-weight: 500;
+    font-size: 0.75rem;
+  }
+}
+
+

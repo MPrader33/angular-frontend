@@ -1,0 +1,45 @@
+<div class="floor-plan-container">
+  <h1>Floor Plan</h1>
+
+  <mat-card class="floor-selector">
+    <mat-form-field>
+      <mat-label>Select Floor</mat-label>
+      <mat-select [formControl]="selectedFloorControl">
+        @for (floor of floors(); track floor.floorNumber) {
+          <mat-option [value]="floor.floorNumber">
+            {{floor.name}}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-icon matSuffix>apartment</mat-icon>
+    </mat-form-field>
+  </mat-card>
+
+  <div class="floor-content">
+    @if (loading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading floor plan...</p>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error-message">
+        <mat-icon>error</mat-icon>
+        <p>{{error()}}</p>
+      </div>
+    }
+
+    @if (!loading() && !error() && !selectedFloorControl.value) {
+      <div class="error-message">
+        <mat-icon>info</mat-icon>
+        <p>No floor plan available. Please select a floor.</p>
+      </div>
+    }
+
+    <!-- Canvas Container -->
+    <div class="canvas-container" #canvasContainer>
+    </div>
+
+  </div>
+</div> 

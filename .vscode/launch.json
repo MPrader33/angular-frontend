@@ -1,0 +1,79 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Angular",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "npm: start",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/src/*",
+        "webpack:///src/*": "${webRoot}/src/*",
+        "webpack:///*": "*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      },
+      "timeout": 30000,
+      "presentation": {
+        "hidden": false,
+        "group": "Angular",
+        "order": 1
+      },
+      "runtimeArgs": [
+        "--disable-web-security",
+        "--user-data-dir=${workspaceFolder}/.chrome-user-data"
+      ]
+    },
+    {
+      "name": "Debug Angular (Pre-started Server)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/src/*",
+        "webpack:///src/*": "${webRoot}/src/*",
+        "webpack:///*": "*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      },
+      "runtimeArgs": [
+        "--disable-web-security",
+        "--user-data-dir=${workspaceFolder}/.chrome-user-data"
+      ]
+    },
+    {
+      "name": "Debug Angular (Edge)",
+      "type": "msedge",
+      "request": "launch",
+      "preLaunchTask": "npm: start",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/src/*",
+        "webpack:///src/*": "${webRoot}/src/*",
+        "webpack:///*": "*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "Debug Angular (No Launch)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/src/*",
+        "webpack:///src/*": "${webRoot}/src/*",
+        "webpack:///*": "*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      }
+    }
+  ]
+} 

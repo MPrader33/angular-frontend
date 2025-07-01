@@ -1,0 +1,8 @@
+.angular
+dist
+node_modules
+coverage
+test-results/
+playwright-report/
+.DS_Store
+.chrome-user-data

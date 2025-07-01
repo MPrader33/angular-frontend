@@ -1,0 +1,77 @@
+<div class="offices-container">
+  <h1>Office assignments</h1>
+
+  <mat-card class="floor-selector">
+    <mat-form-field>
+      <mat-label>Select Floor</mat-label>
+      <mat-select [formControl]="selectedFloorControl">
+        @for (floor of floors(); track floor.floorNumber) {
+          <mat-option [value]="floor.floorNumber">
+            {{floor.name}}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-icon matSuffix>apartment</mat-icon>
+    </mat-form-field>
+  </mat-card>
+
+  <div class="floor-content">
+    @if (loading) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+
+    @if (!loading && selectedFloor()) {
+      <div class="rooms-grid">
+        @for (room of selectedFloor()?.rooms; track room.roomNumber) {
+          <mat-card class="room-card">
+            <mat-card-content>
+              <div class="room-header">
+                <div class="room-info">
+                  <h3>{{room.name}}</h3>
+                  <p class="room-number">Room {{room.roomNumber}}</p>
+                </div>
+                <button mat-raised-button color="primary" 
+                        (click)="printRoomLabel(room)"
+                        [disabled]="isRoomEmpty(room)">
+                  <mat-icon>print</mat-icon>
+                  Print label
+                </button>
+              </div>
+              <div class="employees-list">
+                @for (seat of room.seats; track seat.id) {
+                  <div class="seat-info">
+                    <div class="seat-number">{{seat.seatNumber}}</div>
+                    <div [class.occupied]="seat.employees && seat.employees.length > 0" class="employee-info">
+                      @if (seat.employees && seat.employees.length > 0) {
+                        @for (employee of seat.employees; track employee.id) {
+                          <div class="employee-entry">
+                            <span class="employee-name"
+                                  tabindex="0"
+                                  role="button"
+                                  [attr.aria-label]="'Manage seat assignment for ' + employee.fullName"
+                                  (click)="onEmployeeClick($event, employee.id, employee.fullName, seat.id)"
+                                  (keydown.enter)="onEmployeeClick($event, employee.id, employee.fullName, seat.id)"
+                                  (keydown.space)="onEmployeeClick($event, employee.id, employee.fullName, seat.id); $event.preventDefault()">
+                              {{employee.fullName}} - {{employee.occupation}}
+                            </span>
+                          </div>
+                        }
+                      }
+                      @if (!seat.employees || seat.employees.length === 0) {
+                        <span class="vacant">
+                          Vacant
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  </div>
+</div> 
