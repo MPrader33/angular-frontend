@@ -221,4 +221,14 @@ export class FloorService {
     
     return false;
   }
+
+  deleteSeat(seatId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/seats/${seatId}`).pipe(
+      retry(1),
+      catchError((error: HttpErrorResponse) => {
+        console.error(`Error deleting seat with ID ${seatId}:`, error);
+        return throwError(() => new Error(`Failed to delete seat. Status: ${error.status}`));
+      })
+    );
+  }
 }

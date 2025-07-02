@@ -14,9 +14,11 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { UnassignSeatDialogComponent } from '../unassign-seat-dialog/unassign-seat-dialog.component';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Floor } from '../../interfaces/floor.interface';
 import { Room } from '../../interfaces/room.interface';
 import { Signal } from '@angular/core';
+import { DeleteSeatDialogComponent } from '../delete-seat-dialog/delete-seat-dialog.component';
 
 @Component({
   selector: 'app-offices',
@@ -31,7 +33,8 @@ import { Signal } from '@angular/core';
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   templateUrl: './offices.component.html',
   styleUrls: ['./offices.component.scss']
@@ -151,5 +154,42 @@ export class OfficesComponent implements OnInit {
 
     // Save the PDF
     doc.save(`room-${room.roomNumber}-label.pdf`);
+  }
+
+  onDeleteSeat(seatId: number, seatNumber: string, event: MouseEvent): void {
+    event.stopPropagation();
+
+    const dialogRef = this.dialog.open(DeleteSeatDialogComponent, {
+      width: '400px',
+      data: { seatNumber }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading = true;
+        this.floorService.deleteSeat(seatId).subscribe({
+          next: () => {
+            this.loading = false;
+            this.snackBar.open('Seat deleted successfully!', 'Close', {
+              duration: 3000,
+              verticalPosition: 'top'
+            });
+
+            const currentFloorNumber = this.selectedFloorControl.value;
+            if (currentFloorNumber !== null) {
+              this.floorService.loadFloor(currentFloorNumber);
+            }
+          },
+          error: (err) => {
+            console.error('Failed to delete seat:', err);
+            this.snackBar.open(err.message || 'Failed to delete seat. Please try again', 'Close', {
+              duration: 5000,
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
+          }
+        });
+      }
+    });
   }
 } 

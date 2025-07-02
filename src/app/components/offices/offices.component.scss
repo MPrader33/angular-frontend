@@ -143,6 +143,13 @@
           color: rgba(0, 0, 0, 0.5);
           font-style: italic;
         }
+
+        .vacant-seat-actions {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
       }
     }
   }

@@ -60,9 +60,17 @@
                         }
                       }
                       @if (!seat.employees || seat.employees.length === 0) {
-                        <span class="vacant">
-                          Vacant
-                        </span>
+                        <div class="vacant-seat-actions">
+                          <span class="vacant">
+                            Vacant
+                          </span>
+                          <button mat-icon-button color="warn" 
+                                  (click)="onDeleteSeat(seat.id, seat.seatNumber, $event)"
+                                  matTooltip="Delete this vacant seat"
+                                  aria-label="Delete vacant seat">
+                            <mat-icon>delete_forever</mat-icon>
+                          </button>
+                        </div>
                       }
                     </div>
                   </div>
