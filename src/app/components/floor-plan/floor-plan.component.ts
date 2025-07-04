@@ -106,8 +106,7 @@ export class FloorPlanComponent implements OnInit, AfterViewInit {
     this.svg = d3.select(container)
       .append('svg')
       .attr('width', '100%')
-      .attr('height', '100%')
-      .style('border', '1px solid red');
+      .attr('height', '100%');
 
     // Create a background group for the floor plan SVG
     // This layer will contain the imported background SVG

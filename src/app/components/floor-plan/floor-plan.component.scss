@@ -1,13 +1,20 @@
 .floor-plan-container {
   display: flex;
   flex-direction: column;
+  gap: 2rem;
   height: 100vh;
-  padding: 20px;
+  padding: 32px;
   box-sizing: border-box;
 }
 
 .floor-selector {
+  padding: 1.5rem;
   margin-bottom: 20px;
+
+  mat-form-field {
+    width: 100%;
+    max-width: 300px;
+  }
 }
 
 .floor-content {
@@ -28,7 +35,8 @@
   min-height: 600px;
   position: relative;
   background: white;
-  border: 1px solid #ddd;
+  outline: 1px solid #ddd;
+  border: 1px solid red;
   box-sizing: border-box;
   overflow: hidden; // Prevent overflow during zoom
   

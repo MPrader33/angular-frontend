@@ -1,6 +1,8 @@
 <div class="app-container">
   <app-header></app-header>
+  @if (!(breakpointService.isMobile$ | async)) {
   <main>
     <router-outlet></router-outlet>
   </main>
+  }
 </div>
