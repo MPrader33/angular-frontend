@@ -48,5 +48,29 @@
         </div>
       </mat-card-content>
     </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-info">
+            <h3>Occupied Seats</h3>
+            <p class="stat-number">{{stats()?.occupiedSeats || 0}}</p>
+          </div>
+          <mat-icon class="stat-icon">event_available</mat-icon>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-info">
+            <h3>Occupancy</h3>
+            <p class="stat-number">{{(stats()?.occupancyRate || 0) | number:'1.0-2'}}%</p>
+          </div>
+          <mat-icon class="stat-icon">pie_chart</mat-icon>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div> 

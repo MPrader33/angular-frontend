@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DashboardService } from '../../services/dashboard.service';
-import { DashboardStats } from '../../interfaces/dashboard.interface';
+import { DetailedDashboardStats } from '../../interfaces/dashboard.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,12 +19,13 @@ import { DashboardStats } from '../../interfaces/dashboard.interface';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  stats = signal<DashboardStats | null>(null);
+  stats = signal<DetailedDashboardStats | null>(null);
 
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.loadStats();
+    console.log('DashboardComponent ngOnInit');
   }
 
   private loadStats(): void {

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Floor } from '../interfaces/floor.interface';
-import { catchError, retry, throwError } from 'rxjs';
+import { catchError, retry, throwError, tap } from 'rxjs';
 import { Observable } from 'rxjs';
 import { Seat } from '../interfaces/seat.interface';
 
@@ -222,13 +222,54 @@ export class FloorService {
     return false;
   }
 
+  addSeat(seat: Omit<Seat, 'id' | 'seatNumber' | 'createdAt'>): Observable<Seat> {
+    return this.http.post<Seat>(`${this.apiUrl}/seats`, seat).pipe(
+      retry(1),
+      tap(newSeat => this.addSeatToSignal(newSeat)),
+      catchError((error: HttpErrorResponse) => {
+        console.error(`Error adding new seat:`, error);
+        return throwError(() => new Error(`Failed to add seat. Status: ${error.status}`));
+      })
+    );
+  }
+
+  private addSeatToSignal(newSeat: Seat) {
+    const floor = this.selectedFloorSignal();
+    if (!floor || !floor.rooms || !newSeat.room) return;
+
+    const updatedRooms = floor.rooms.map(room => {
+      if (room.id === newSeat.room!.id) {
+        return {
+          ...room,
+          seats: [ ...(room.seats ?? []), newSeat ]
+        };
+      }
+      return room;
+    });
+
+    this.selectedFloorSignal.set({ ...floor, rooms: updatedRooms });
+  }
+
   deleteSeat(seatId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/seats/${seatId}`).pipe(
       retry(1),
+      tap(() => this.removeSeatFromSignal(seatId)),
       catchError((error: HttpErrorResponse) => {
         console.error(`Error deleting seat with ID ${seatId}:`, error);
         return throwError(() => new Error(`Failed to delete seat. Status: ${error.status}`));
       })
     );
+  }
+
+  private removeSeatFromSignal(seatId: number) {
+    const floor = this.selectedFloorSignal();
+    if (!floor || !floor.rooms) return;
+
+    const updatedRooms = floor.rooms.map(room => ({
+      ...room,
+      seats: room.seats?.filter(seat => seat.id !== seatId) ?? []
+    }));
+
+    this.selectedFloorSignal.set({ ...floor, rooms: updatedRooms });
   }
 }

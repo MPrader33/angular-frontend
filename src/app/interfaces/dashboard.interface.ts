@@ -7,7 +7,6 @@ export interface DashboardStats {
 
 // Keeping the original interface for backward compatibility
 export interface DetailedDashboardStats extends DashboardStats {
+  occupiedSeats: number;
   occupancyRate: number;
-  officesPerFloor: { floorNumber: number; officeCount: number }[];
-  seatsPerFloor: { floorNumber: number; seatCount: number }[];
 } 

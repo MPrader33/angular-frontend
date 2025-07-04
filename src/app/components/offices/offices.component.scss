@@ -89,6 +89,7 @@
       padding: 0.5rem;
       background: #f5f5f5;
       border-radius: 4px;
+      height: 48px;
 
       .seat-number {
         min-width: 60px;
@@ -150,7 +151,11 @@
           align-items: center;
           width: 100%;
         }
+
+        .spinner-wrapper {
+          margin: 12px;
+        }
       }
     }
   }
-} 
+}

@@ -16,13 +16,13 @@
   </mat-card>
 
   <div class="floor-content">
-    @if (loading) {
-      <div class="loading-container">
+    @if (loadingFloor) {
+      <div class="loadingFloor-container">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
     }
 
-    @if (!loading && selectedFloor()) {
+    @if (!loadingFloor && selectedFloor()) {
       <div class="rooms-grid">
         @for (room of selectedFloor()?.rooms; track room.roomNumber) {
           <mat-card class="room-card">
@@ -64,17 +64,36 @@
                           <span class="vacant">
                             Vacant
                           </span>
-                          <button mat-icon-button color="warn" 
-                                  (click)="onDeleteSeat(seat.id, seat.seatNumber, $event)"
-                                  matTooltip="Delete this vacant seat"
-                                  aria-label="Delete vacant seat">
-                            <mat-icon>delete_forever</mat-icon>
-                          </button>
+                          @if (deletingSeatId === seat.id) {
+                            <div class="spinner-wrapper">
+                              <mat-spinner diameter="24"></mat-spinner>
+                            </div>
+                          }
+                          @else {
+                            <button mat-icon-button color="warn" 
+                                    (click)="onDeleteSeat(seat.id, seat.seatNumber, $event)"
+                                    matTooltip="Delete this vacant seat"
+                                    aria-label="Delete vacant seat">
+                              <mat-icon>delete_forever</mat-icon>
+                            </button>
+                          }
                         </div>
                       }
                     </div>
                   </div>
                 }
+                @if (addingSeatRoomId === room.id) { 
+                  <button mat-raised-button color="primary" [disabled]="true">
+                    <mat-spinner diameter="20"></mat-spinner>
+                  </button>
+                }
+                @else if (!isSeatLimitReached(room)) {
+                  <button mat-raised-button color="primary"
+                          (click)="onAddSeat(room, $event)">
+                    <mat-icon>add</mat-icon>
+                    Add seat
+                  </button>
+                }                  
               </div>
             </mat-card-content>
           </mat-card>

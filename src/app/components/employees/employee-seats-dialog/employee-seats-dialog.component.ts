@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Signal, effect } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { DashboardService } from '../../../services/dashboard.service';
 
 @Component({
   selector: 'app-employee-seats-dialog',
@@ -55,6 +56,7 @@ export class EmployeeSeatsDialogComponent {
     private router: Router,
     private floorService: FloorService,
     private snackBar: MatSnackBar,
+    private dashboardService: DashboardService,
     @Inject(MAT_DIALOG_DATA) public employee: Employee
   ) {
     // Initialize floor service signals first
@@ -178,6 +180,8 @@ export class EmployeeSeatsDialogComponent {
           // Switch back to seats view and reload the list
           this.isAssigningSeats = false;
           this.loadEmployeeSeats(true);
+
+          this.dashboardService.resetStats();
         },
         error: (error) => {
           console.error('Seat assignment failed:', error);

@@ -17,8 +17,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Floor } from '../../interfaces/floor.interface';
 import { Room } from '../../interfaces/room.interface';
+import { Seat } from '../../interfaces/seat.interface';
 import { Signal } from '@angular/core';
 import { DeleteSeatDialogComponent } from '../delete-seat-dialog/delete-seat-dialog.component';
+import { finalize } from 'rxjs/operators';
+import { DashboardService } from '../../services/dashboard.service';
+
+const MAX_SEATS_NUMBER = 4;
 
 @Component({
   selector: 'app-offices',
@@ -40,18 +45,21 @@ import { DeleteSeatDialogComponent } from '../delete-seat-dialog/delete-seat-dia
   styleUrls: ['./offices.component.scss']
 })
 export class OfficesComponent implements OnInit {
-  loading = false;
+  loadingFloor = false;
   error: string | null = null;
   selectedFloorControl = new FormControl<number | null>(null);
   floors: Signal<Floor[]>;
   selectedFloor: Signal<Floor | null>;
+  deletingSeatId: number | null = null;
+  addingSeatRoomId: number | null = null;
 
   constructor(
     private floorService: FloorService,
     private dialog: MatDialog,
     private http: HttpClient,
     private snackBar: MatSnackBar,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private dashboardService: DashboardService
   ) {
     this.floors = this.floorService.floors;
     this.selectedFloor = this.floorService.selectedFloor;
@@ -59,6 +67,11 @@ export class OfficesComponent implements OnInit {
 
   isRoomEmpty(room: Room): boolean {
     return !room.seats?.some(seat => seat.employees && seat.employees.length > 0);
+  }
+
+  isSeatLimitReached(room: Room): boolean {
+    const count = room.seats?.length ?? 0;
+    return count >= MAX_SEATS_NUMBER;
   }
 
   onEmployeeClick(event: Event, employeeId: number, employeeName: string, seatId: number): void {
@@ -84,6 +97,7 @@ export class OfficesComponent implements OnInit {
           if (currentFloor !== null) {
             this.floorService.loadFloor(currentFloor);
           }
+          this.dashboardService.resetStats();
           this.snackBar.open('Seat unassigned successfully', 'Close', {
             duration: 3000,
             horizontalPosition: 'end',
@@ -106,10 +120,10 @@ export class OfficesComponent implements OnInit {
     // Handle floor selection changes
     this.selectedFloorControl.valueChanges.subscribe(floorNumber => {
       if (floorNumber !== null) {
-        this.loading = true;
+        this.loadingFloor = true;
         this.error = null;
         this.floorService.loadFloor(floorNumber);
-        this.loading = false;
+        this.loadingFloor = false;
       }
     });
 
@@ -156,6 +170,68 @@ export class OfficesComponent implements OnInit {
     doc.save(`room-${room.roomNumber}-label.pdf`);
   }
 
+  onAddSeat(room: Room, event: MouseEvent): void {
+    event.stopPropagation();
+
+    this.addingSeatRoomId = room.id;
+
+    const newSeatNumber = this.generateSeatNumber(room);
+
+     const seat = {
+      room: room,
+      seatNumber: newSeatNumber
+    };
+
+    this.floorService.addSeat(seat)
+      .pipe(finalize(() => this.addingSeatRoomId = null))
+      .subscribe({
+        next: () => {
+          this.dashboardService.resetStats();
+          this.snackBar.open('Seat added successfully!', 'Close', {
+            duration: 3000,
+            verticalPosition: 'top'
+          });
+        },
+        error: (err) => {
+          console.error('Failed to add seat:', err);
+          this.snackBar.open(err.message || 'Failed to add seat. Please try again', 'Close', {
+            duration: 5000,
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+  }
+
+  private generateSeatNumber(room: Room): string {
+    const roomNumber = room.roomNumber;
+
+    const existingSeatNumbers: number[] = room.seats?.map(seat => {
+      const parts = seat.seatNumber.split('-');
+      if (parts.length === 2) {
+        return parseInt(parts[1], 10);
+      }
+      return 0;
+    })
+    .filter(num => num > 0)
+    .sort((a, b) => a - b) || [];
+
+    let nextSeatNum = 1;
+
+    for (let i = 0; i < existingSeatNumbers.length; i++) {
+      if (existingSeatNumbers[i] === nextSeatNum) {
+        nextSeatNum++;
+      }
+      else if (existingSeatNumbers[i] > nextSeatNum) {
+        break;
+      }
+    }
+    
+    const formattedSeatNum = nextSeatNum.toString().padStart(2, '0');
+
+    return `${roomNumber}-${formattedSeatNum}`;
+  }
+
   onDeleteSeat(seatId: number, seatNumber: string, event: MouseEvent): void {
     event.stopPropagation();
 
@@ -165,20 +241,19 @@ export class OfficesComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.loading = true;
-        this.floorService.deleteSeat(seatId).subscribe({
+      if (!result) return;
+      
+      this.deletingSeatId = seatId;
+
+      this.floorService.deleteSeat(seatId)
+        .pipe(finalize(() => this.deletingSeatId = null))
+        .subscribe({
           next: () => {
-            this.loading = false;
+            this.dashboardService.resetStats();
             this.snackBar.open('Seat deleted successfully!', 'Close', {
               duration: 3000,
               verticalPosition: 'top'
             });
-
-            const currentFloorNumber = this.selectedFloorControl.value;
-            if (currentFloorNumber !== null) {
-              this.floorService.loadFloor(currentFloorNumber);
-            }
           },
           error: (err) => {
             console.error('Failed to delete seat:', err);
@@ -189,7 +264,6 @@ export class OfficesComponent implements OnInit {
             });
           }
         });
-      }
     });
   }
 } 
